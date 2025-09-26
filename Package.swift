@@ -13,6 +13,6 @@ let package = Package(
       .binaryTarget(
          name: "keyple-interop-jsonapi-client-ioslib",
          url: "https://github.com/jeanpierrefortune/keyple.keyple-interop-jsonapi-client-nfc-xcframework/releases/download/1.0.0/keyple-interop-jsonapi-client-nfc-xcframework.zip",
-         checksum:"9a2e8c6ebe0415ac2e22e2d7fd11fbeb031f0dbf5d7d62d34ef494eb03f1ad55")
+         checksum:"XXXXXXXXXXXXXXX")
    ]
 )
