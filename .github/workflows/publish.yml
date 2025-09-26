@@ -42,12 +42,13 @@ jobs:
 
       - name: Update Package.swift file
         run: |
+          TIMESTAMP="// Generated on $(date '+%Y-%m-%d %H:%M:%S')"
           PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.tag }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
-          # Use sed to replace the URL and checksum
-          # The -i '' option is needed on macOS
-          sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
-          sed -i '' "s|checksum: \".*\"|checksum: \"${{ env.checksum }}\"|" Package.swift
-          echo "Package.swift has been updated with the permalink and checksum."
+          
+          # Use sed to replace the URL, checksum, and add a comment on the checksum line.
+          # The -i '' option is needed on macOS.
+          sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|; s|checksum: \".*\"|checksum: \"${{ env.checksum }}\", $TIMESTAMP|" Package.swift
+          echo "Package.swift has been updated with the permalink, checksum and timestamp."
           cat Package.swift # Display the file for verification
 
       - name: Commit and tag changes
