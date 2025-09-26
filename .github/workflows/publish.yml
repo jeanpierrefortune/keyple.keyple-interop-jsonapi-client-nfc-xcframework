@@ -28,7 +28,7 @@ jobs:
 
       - name: Zip artifact
         run: |
-          zip -r keyple-interop-jsonapi-client-nfc-xcframework.zip build/XCFrameworks/release/keyple-interop-jsonapi-client-nfc-xcframework.xcframework
+          zip -r keyple-interop-jsonapi-client-nfc-xcframework.zip build/XCFrameworks/release/keyple_interop_jsonapi_client_nfc_xcframework.xcframework
 
       - name: Compute checksum
         id: compute_checksum
