@@ -28,7 +28,10 @@ jobs:
 
       - name: Zip artifact
         run: |
-          zip -r keyple-interop-jsonapi-client-nfc-xcframework.zip build/XCFrameworks/release/keyple_interop_jsonapi_client_nfc_xcframework.xcframework
+          # The zip command is now executed from inside the release directory
+          # to ensure the zip file does not contain a folder hierarchy.
+          cd build/XCFrameworks/release
+          zip -r ../../../keyple-interop-jsonapi-client-nfc-xcframework.zip keyple_interop_jsonapi_client_nfc_xcframework.xcframework
 
       - name: Compute checksum
         id: compute_checksum
