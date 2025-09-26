@@ -42,20 +42,17 @@ jobs:
 
       - name: Update Package.swift file
         run: |
-          # The timestamp needs to be escaped for the final sed command
-          TIMESTAMP="// Generated on $(date '+%Y-%m-%d %H:%M:%S')"
+          TIMESTAMP=" // Generated on $(date '+%Y-%m-%d %H:%M:%S')"
           PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.tag }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
           
           # 1. Replace the URL value
           sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
           
-          # 2. Replace the checksum value AND clean up any trailing text/comments until the end of the line.
-          # We search for the pattern "checksum: ".*"" followed by any characters until the closing parenthesis and a possible comment.
-          # The replacement string is carefully constructed with the correct parenthesis position.
-          sed -i '' "s|checksum: \".*\") *.*$|checksum: \"${{ env.checksum }}\")$TIMESTAMP|" Package.swift
-
+          # 2. Replace the checksum value (avec ou sans espace après checksum:)
+          sed -i '' "s|checksum: *\"[^\"]*\").*$|checksum: \"${{ env.checksum }}\")$TIMESTAMP|" Package.swift
+          
           echo "Package.swift has been updated with the permalink, checksum and timestamp."
-          cat Package.swift # Display the file for verification
+          cat Package.swift
 
       - name: Commit and tag changes
         run: |
