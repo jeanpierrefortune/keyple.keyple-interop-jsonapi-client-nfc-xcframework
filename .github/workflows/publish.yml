@@ -45,9 +45,18 @@ jobs:
           TIMESTAMP="// Generated on $(date '+%Y-%m-%d %H:%M:%S')"
           PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.tag }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
           
-          # Use sed to replace the URL, checksum, and add a comment on the checksum line.
-          # The -i '' option is needed on macOS.
-          sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|; s|checksum: \".*\"|checksum: \"${{ env.checksum }}\", $TIMESTAMP|" Package.swift
+          # A more robust way to update the file without sed
+          awk -v PERMALINK="$PERMALINK" -v CHECKSUM="${{ env.checksum }}" -v TIMESTAMP="$TIMESTAMP" \
+          '{
+            if ($0 ~ /url: "/) {
+              gsub(/".*"/,"\"" PERMALINK "\"", $0)
+            }
+            if ($0 ~ /checksum:/) {
+              gsub(/".*"/,"\"" CHECKSUM "\", " TIMESTAMP, $0)
+            }
+            print
+          }' Package.swift > temp_Package.swift && mv temp_Package.swift Package.swift
+
           echo "Package.swift has been updated with the permalink, checksum and timestamp."
           cat Package.swift # Display the file for verification
 
