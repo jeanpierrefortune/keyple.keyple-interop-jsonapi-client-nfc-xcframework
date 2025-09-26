@@ -52,7 +52,7 @@ jobs:
               gsub(/".*"/,"\"" PERMALINK "\"", $0)
             }
             if ($0 ~ /checksum:/) {
-              gsub(/".*"/,"\"" CHECKSUM "\", " TIMESTAMP, $0)
+              gsub(/".*"/,"\"" CHECKSUM "\") " TIMESTAMP, $0)
             }
             print
           }' Package.swift > temp_Package.swift && mv temp_Package.swift Package.swift
