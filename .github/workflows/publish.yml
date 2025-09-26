@@ -1,0 +1,66 @@
+name: Publish iOS XCFramework
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The release version (e.g., 1.2.3)'
+        required: true
+
+jobs:
+  publish:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17 (required for Gradle)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build XCFramework
+        run: ./gradlew assembleXCFramework --no-daemon
+
+      - name: Zip artifact
+        run: |
+          zip -r keyple-interop-jsonapi-client-nfc-xcframework.zip build/XCFrameworks/release/keyple-interop-jsonapi-client-nfc-xcframework.xcframework
+
+      - name: Compute checksum
+        id: compute_checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum keyple-interop-jsonapi-client-nfc-xcframework.zip)
+          echo "checksum=$CHECKSUM" >> $GITHUB_ENV
+          echo "Computed checksum: $CHECKSUM"
+
+      - name: Update Package.swift file
+        run: |
+          PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.tag }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
+          # Use sed to replace the URL and checksum
+          # The -i '' option is needed on macOS
+          sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
+          sed -i '' "s|checksum: \".*\"|checksum: \"${{ env.checksum }}\"|" Package.swift
+          echo "Package.swift has been updated with the permalink and checksum."
+          cat Package.swift # Display the file for verification
+
+      - name: Commit and tag changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add Package.swift
+          git commit -m "Update Package.swift for release ${{ github.event.inputs.tag }}"
+          git tag ${{ github.event.inputs.tag }}
+          git push
+          git push --tags
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: ${{ github.event.inputs.tag }}
+          body: "XCFramework release for ${{ github.event.inputs.tag }}"
+          files: keyple-interop-jsonapi-client-nfc-xcframework.zip
