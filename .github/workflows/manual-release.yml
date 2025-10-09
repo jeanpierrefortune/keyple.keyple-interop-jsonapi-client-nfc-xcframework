@@ -26,12 +26,39 @@ jobs:
       - name: Build XCFramework
         run: ./gradlew assembleXCFramework --no-daemon
 
+      - name: Validate XCFramework
+        run: |
+          # Find the generated XCFramework
+          XCFRAMEWORK_PATH=$(find build/XCFrameworks/release -name "*.xcframework" -type d | head -1)
+
+          if [ -z "$XCFRAMEWORK_PATH" ]; then
+            echo "Error: No XCFramework found in build/XCFrameworks/release"
+            exit 1
+          fi
+
+          echo "Found XCFramework: $XCFRAMEWORK_PATH"
+
+          # Verify XCFramework structure
+          if [ ! -f "$XCFRAMEWORK_PATH/Info.plist" ]; then
+            echo "Error: Info.plist not found in XCFramework"
+            exit 1
+          fi
+
+          # List contents for verification
+          echo "XCFramework contents:"
+          ls -R "$XCFRAMEWORK_PATH"
+
+          echo "XCFramework validation completed successfully"
+
       - name: Zip artifact
         run: |
           # The zip command is now executed from inside the release directory
           # to ensure the zip file does not contain a folder hierarchy.
           cd build/XCFrameworks/release
-          zip -r ../../../keyple-interop-jsonapi-client-nfc-xcframework.zip KeypleInteropJsonapiClientNfc.xcframework
+          # Gradle automatically converts camelCase to snake_case for XCFramework names
+          XCFRAMEWORK=$(ls -d *.xcframework | head -1)
+          echo "Found XCFramework: $XCFRAMEWORK"
+          zip -r ../../../keyple-interop-jsonapi-client-nfc-xcframework.zip "$XCFRAMEWORK"
 
       - name: Compute checksum
         id: compute_checksum
