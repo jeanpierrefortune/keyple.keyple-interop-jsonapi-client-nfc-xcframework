@@ -1,4 +1,4 @@
-rootProject.name = "keyple-interop-jsonapi-client-nfc-xcframework"
+rootProject.name = "KeypleInteropJsonapiClientNfc"
 
 pluginManagement {
   repositories {
