@@ -8,7 +8,7 @@ echo "[DEBUG] Detecting library changes since ${PREV_TAG}"
 # Function to extract the version of a library from libs.versions.toml
 get_version() {
     local lib_name="$1"
-    sed -n "s/.*${lib_name}.*\"\([0-9]\+\.[0-9]\+\.[0-9]\+\)\".*/\1/p" libs.versions.toml
+    sed -n "s/.*${lib_name}.*\"\([0-9]\+\.[0-9]\+\.[0-9]\+\)\".*/\1/p" "${GITHUB_WORKSPACE}/gradle/libs.versions.toml"
 }
 
 # Get previous versions
