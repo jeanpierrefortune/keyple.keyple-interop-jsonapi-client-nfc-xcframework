@@ -11,6 +11,8 @@ on:
 jobs:
   release:
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -40,14 +42,73 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Calculated new version: $NEW_VERSION ($CHANGE_LEVEL)"
 
-      - name: Tag and push new version
-        run: |
-          git tag ${{ steps.calc.outputs.version }}
-          git push origin ${{ steps.calc.outputs.version }}
-          git push
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Build XCFramework
-        run: ./gradlew buildReleaseXCFramework
+        run: ./gradlew assembleXCFramework --no-daemon
+
+      - name: Validate XCFramework
+        run: |
+          # Find the generated XCFramework
+          XCFRAMEWORK_PATH=$(find build/XCFrameworks/release -name "*.xcframework" -type d | head -1)
+          if [ -z "$XCFRAMEWORK_PATH" ]; then
+            echo "Error: No XCFramework found in build/XCFrameworks/release"
+            exit 1
+          fi
+          echo "Found XCFramework: $XCFRAMEWORK_PATH"
+          
+          # Verify XCFramework structure
+          if [ ! -f "$XCFRAMEWORK_PATH/Info.plist" ]; then
+            echo "Error: Info.plist not found in XCFramework"
+            exit 1
+          fi
+          
+          # List contents for verification
+          echo "XCFramework contents:"
+          ls -R "$XCFRAMEWORK_PATH"
+          echo "XCFramework validation completed successfully"
+
+      - name: Zip artifact
+        run: |
+          cd build/XCFrameworks/release
+          XCFRAMEWORK=$(ls -d *.xcframework | head -1)
+          echo "Found XCFramework: $XCFRAMEWORK"
+          zip -r ../../../keyple-interop-jsonapi-client-nfc-xcframework.zip "$XCFRAMEWORK"
+
+      - name: Compute checksum
+        id: compute_checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum keyple-interop-jsonapi-client-nfc-xcframework.zip)
+          echo "checksum=$CHECKSUM" >> $GITHUB_ENV
+          echo "Computed checksum: $CHECKSUM"
+
+      - name: Update Package.swift file
+        run: |
+          TIMESTAMP=" // Generated on $(date '+%Y-%m-%d %H:%M:%S')"
+          PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ steps.calc.outputs.version }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
+          
+          # Replace the URL value
+          sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
+          
+          # Replace the checksum value
+          sed -i '' "s|checksum: *\"[^\"]*\").*$|checksum: \"${{ env.checksum }}\")$TIMESTAMP|" Package.swift
+          
+          echo "Package.swift has been updated with the permalink, checksum and timestamp."
+          cat Package.swift
+
+      - name: Commit and tag changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add Package.swift
+          git commit -m "Update Package.swift for release ${{ steps.calc.outputs.version }}"
+          git tag ${{ steps.calc.outputs.version }}
+          git push
+          git push --tags
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -60,4 +121,4 @@ jobs:
             **Embedded libs**
             - keypleInteropJsonapiClientKmpLib: $(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
             - keypleInteropLocalreaderNfcmobileKmpLib: $(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
-          files: build/XCFrameworks/*.zip
+          files: keyple-interop-jsonapi-client-nfc-xcframework.zip
