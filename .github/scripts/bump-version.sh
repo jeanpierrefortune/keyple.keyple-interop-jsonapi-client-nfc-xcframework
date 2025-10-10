@@ -17,7 +17,7 @@ case "$CHANGE" in
     NEW_VERSION="$MAJ.$MIN.$((PAT + 1))"
     ;;
   none)
-    # No change detected on libs → go to patch +1
+    # No library change detected, bump patch by default
     echo "No library change detected, bumping patch version by default."
     NEW_VERSION="$MAJ.$MIN.$((PAT + 1))"
     ;;
