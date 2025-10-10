@@ -23,8 +23,8 @@ jobs:
         run: |
           chmod +x .github/scripts/detect-lib-change-git.sh .github/scripts/bump-version.sh
 
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          PREV_VERSION=${PREV_TAG#v}
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          PREV_VERSION="$PREV_TAG"
 
           # If manual bump is requested
           if [ -n "${{ github.event.inputs.bump }}" ]; then
@@ -42,8 +42,8 @@ jobs:
 
       - name: Tag and push new version
         run: |
-          git tag v${{ steps.calc.outputs.version }}
-          git push origin v${{ steps.calc.outputs.version }}
+          git tag ${{ steps.calc.outputs.version }}
+          git push origin ${{ steps.calc.outputs.version }}
           git push
 
       - name: Build XCFramework
@@ -52,8 +52,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.calc.outputs.version }}
-          name: Release v${{ steps.calc.outputs.version }}
+          tag_name: ${{ steps.calc.outputs.version }}
+          name: Release ${{ steps.calc.outputs.version }}
           body: |
             Automated release based on library versions.
 
