@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Needed to access tags
 
       - name: Determine next version
         id: calc
@@ -26,13 +26,16 @@ jobs:
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           PREV_VERSION=${PREV_TAG#v}
 
+          # If manual bump is requested
           if [ -n "${{ github.event.inputs.bump }}" ]; then
             echo "Manual bump requested: ${{ github.event.inputs.bump }}"
             CHANGE_LEVEL="${{ github.event.inputs.bump }}"
           else
+            # Auto-detect library changes
             CHANGE_LEVEL=$(bash .github/scripts/detect-lib-change-git.sh "$PREV_TAG")
           fi
 
+          # Compute new framework version
           NEW_VERSION=$(bash .github/scripts/bump-version.sh "$PREV_VERSION" "$CHANGE_LEVEL")
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Calculated new version: $NEW_VERSION ($CHANGE_LEVEL)"
@@ -53,6 +56,7 @@ jobs:
           name: Release v${{ steps.calc.outputs.version }}
           body: |
             Automated release based on library versions.
+
             **Embedded libs**
             - keypleInteropJsonapiClientKmpLib: $(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
             - keypleInteropLocalreaderNfcmobileKmpLib: $(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')

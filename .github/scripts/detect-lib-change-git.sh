@@ -2,7 +2,7 @@
 set -e
 
 PREV_TAG=$1
-echo "🔍 Detecting library changes since $PREV_TAG
+echo "Detecting library changes since $PREV_TAG"
 
 # Get the previous libs.versions.toml from last tag
 git show "$PREV_TAG:gradle/libs.versions.toml" > prev_libs.versions.toml || echo "" > prev_libs.versions.toml
@@ -15,10 +15,11 @@ PREV_LIB_B=$(grep 'keypleInteropLocalreaderNfcmobileKmpLib' prev_libs.versions.t
 CUR_LIB_A=$(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
 CUR_LIB_B=$(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
 
+# Debug output
 echo "Previous: A=$PREV_LIB_A, B=$PREV_LIB_B"
 echo "Current : A=$CUR_LIB_A, B=$CUR_LIB_B"
 
-# Function to compare two semantic versions
+# Compare semantic versions
 compare_versions() {
   local OLD=$1
   local NEW=$2
@@ -40,7 +41,7 @@ compare_versions() {
 change_a=$(compare_versions "$PREV_LIB_A" "$CUR_LIB_A")
 change_b=$(compare_versions "$PREV_LIB_B" "$CUR_LIB_B")
 
-# Determine the highest change level
+# Determine highest change level
 if [ "$change_a" == "major" ] || [ "$change_b" == "major" ]; then
   echo "major"
 elif [ "$change_a" == "minor" ] || [ "$change_b" == "minor" ]; then
