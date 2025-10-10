@@ -86,6 +86,15 @@ jobs:
           echo "checksum=$CHECKSUM" >> $GITHUB_ENV
           echo "Computed checksum: $CHECKSUM"
 
+      - name: Extract library versions
+        id: lib_versions
+        run: |
+          KEYPLE_JSONAPI=$(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
+          KEYPLE_NFCMOBILE=$(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
+          echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
+          echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
+          echo "Extracted versions: jsonapi=$KEYPLE_JSONAPI, nfcmobile=$KEYPLE_NFCMOBILE"
+
       - name: Update Package.swift file
         run: |
           TIMESTAMP=" // Generated on $(date '+%Y-%m-%d %H:%M:%S')"
@@ -119,6 +128,6 @@ jobs:
             Automated release based on library versions.
 
             **Embedded libs**
-            - keypleInteropJsonapiClientKmpLib: $(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
-            - keypleInteropLocalreaderNfcmobileKmpLib: $(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
+            - keypleInteropJsonapiClientKmpLib: ${{ steps.lib_versions.outputs.jsonapi }}
+            - keypleInteropLocalreaderNfcmobileKmpLib: ${{ steps.lib_versions.outputs.nfcmobile }}
           files: keyple-interop-jsonapi-client-nfc-xcframework.zip
