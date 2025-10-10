@@ -18,7 +18,7 @@ case "$CHANGE" in
     ;;
   none)
     # No library change detected, bump patch by default
-    echo "No library change detected, bumping patch version by default."
+    echo "No library change detected, bumping patch version by default." >&2
     NEW_VERSION="$MAJ.$MIN.$((PAT + 1))"
     ;;
   *)
@@ -27,4 +27,5 @@ case "$CHANGE" in
     ;;
 esac
 
+# Only output the version string on stdout
 echo "$NEW_VERSION"
