@@ -7,13 +7,13 @@ echo "Detecting library changes since $PREV_TAG"
 # Get the previous libs.versions.toml from last tag
 git show "$PREV_TAG:gradle/libs.versions.toml" > prev_libs.versions.toml || echo "" > prev_libs.versions.toml
 
-# Extract previous library versions (exact semantic version only)
-PREV_LIB_A=$(grep '^keypleInteropJsonapiClientKmpLib\s*=' prev_libs.versions.toml | sed -E 's/.*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/' || echo "0.0.0")
-PREV_LIB_B=$(grep '^keypleInteropLocalreaderNfcmobileKmpLib\s*=' prev_libs.versions.toml | sed -E 's/.*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/' || echo "0.0.0")
+# Extract previous library versions (from [versions] section only)
+PREV_LIB_A=$(awk '/\[versions\]/{flag=1; next} /^\[/{flag=0} flag && /^keypleInteropJsonapiClientKmpLib\s*=/ {match($0, /"([0-9]+\.[0-9]+\.[0-9]+)"/, arr); print arr[1]}' prev_libs.versions.toml || echo "0.0.0")
+PREV_LIB_B=$(awk '/\[versions\]/{flag=1; next} /^\[/{flag=0} flag && /^keypleInteropLocalreaderNfcmobileKmpLib\s*=/ {match($0, /"([0-9]+\.[0-9]+\.[0-9]+)"/, arr); print arr[1]}' prev_libs.versions.toml || echo "0.0.0")
 
 # Extract current library versions
-CUR_LIB_A=$(grep '^keypleInteropJsonapiClientKmpLib\s*=' gradle/libs.versions.toml | sed -E 's/.*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
-CUR_LIB_B=$(grep '^keypleInteropLocalreaderNfcmobileKmpLib\s*=' gradle/libs.versions.toml | sed -E 's/.*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
+CUR_LIB_A=$(awk '/\[versions\]/{flag=1; next} /^\[/{flag=0} flag && /^keypleInteropJsonapiClientKmpLib\s*=/ {match($0, /"([0-9]+\.[0-9]+\.[0-9]+)"/, arr); print arr[1]}' gradle/libs.versions.toml)
+CUR_LIB_B=$(awk '/\[versions\]/{flag=1; next} /^\[/{flag=0} flag && /^keypleInteropLocalreaderNfcmobileKmpLib\s*=/ {match($0, /"([0-9]+\.[0-9]+\.[0-9]+)"/, arr); print arr[1]}' gradle/libs.versions.toml)
 
 # Debug output (optional)
 echo "Previous versions: A=$PREV_LIB_A, B=$PREV_LIB_B"
