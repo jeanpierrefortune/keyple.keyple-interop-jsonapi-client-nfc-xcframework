@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 ///////////////////////////////////////////////////////////////////////////////
-// GRADLE CONFIGURATION
+//  GRADLE CONFIGURATION
 ///////////////////////////////////////////////////////////////////////////////
 
 plugins {
@@ -10,14 +10,9 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
-tasks {
-  spotless {
-    kotlinGradle {
-      target("**/*.kts")
-      ktfmt()
-    }
-  }
-}
+///////////////////////////////////////////////////////////////////////////////
+//  APP CONFIGURATION
+///////////////////////////////////////////////////////////////////////////////
 
 kotlin {
   if (System.getProperty("os.name").lowercase().contains("mac")) {
@@ -57,6 +52,24 @@ kotlin {
           api(libs.keypleInteropLocalreaderNfcmobileKmpLib)
         }
       }
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  STANDARD CONFIGURATION FOR KOTLIN-LIB MULTIPLATFORM PROJECTS
+///////////////////////////////////////////////////////////////////////////////
+
+tasks {
+  spotless {
+    kotlin {
+      target("src/**/*.kt")
+      licenseHeaderFile("${project.rootDir}/LICENSE_HEADER")
+      ktfmt()
+    }
+    kotlinGradle {
+      target("**/*.kts")
+      ktfmt()
     }
   }
 }
