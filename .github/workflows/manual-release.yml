@@ -29,17 +29,17 @@ jobs:
       - name: Extract library versions
         id: lib_versions
         run: |
-          KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | cut -d'"' -f2)
-          KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | cut -d'"' -f2)
-          
-          # Check if versions have been extracted successfully
-          if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
-            echo "Error: Unable to extract the version of one or more libraries." >&2
+            KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
+            KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
+            
+            # Check if versions have been extracted successfully
+            if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
+          echo "Error: Unable to extract the version of one or more libraries." >&2
             exit 1
-          fi
-          
-          echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
-          echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
+            fi
+            
+            echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
+            echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
           echo "Extracted versions: jsonapi=$KEYPLE_JSONAPI, nfcmobile=$KEYPLE_NFCMOBILE"
 
       - name: Setup JDK 17
@@ -119,6 +119,6 @@ jobs:
             Automated release based on library versions.
 
             **Embedded libs**
-            - keypleInteropJsonapiClientKmpLib: ${{ steps.lib_versions.outputs.jsonapi }}
-            - keypleInteropLocalreaderNfcmobileKmpLib: ${{ steps.lib_versions.outputs.nfcmobile }}
+            - keypleInteropJsonapiClientKmpLibVersion: ${{ steps.lib_versions.outputs.jsonapi }}
+            - keypleInteropLocalreaderNfcmobileKmpLibVersion: ${{ steps.lib_versions.outputs.nfcmobile }}
           files: keyple-interop-jsonapi-client-nfc-xcframework.zip
