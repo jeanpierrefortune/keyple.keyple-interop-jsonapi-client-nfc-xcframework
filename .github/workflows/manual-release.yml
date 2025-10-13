@@ -26,6 +26,22 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Using version from gradle.properties: $VERSION"
 
+      - name: Extract library versions
+        id: lib_versions
+        run: |
+          KEYPLE_JSONAPI=$(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed -n 's/.*= *"\([^"]*\)".*/\1/p')
+          KEYPLE_NFCMOBILE=$(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed -n 's/.*= *"\([^"]*\)".*/\1/p')
+          
+          # Check if versions were extracted successfully
+          if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
+            echo "Error: Could not extract one or more library versions." >&2
+            exit 1
+          fi
+          
+          echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
+          echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
+          echo "Extracted versions: jsonapi=$KEYPLE_JSONAPI, nfcmobile=$KEYPLE_NFCMOBILE"
+
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
@@ -69,15 +85,6 @@ jobs:
           CHECKSUM=$(swift package compute-checksum keyple-interop-jsonapi-client-nfc-xcframework.zip)
           echo "checksum=$CHECKSUM" >> $GITHUB_ENV
           echo "Computed checksum: $CHECKSUM"
-
-      - name: Extract library versions
-        id: lib_versions
-        run: |
-          KEYPLE_JSONAPI=$(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
-          KEYPLE_NFCMOBILE=$(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed 's/.*= "\(.*\)"/\1/')
-          echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
-          echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
-          echo "Extracted versions: jsonapi=$KEYPLE_JSONAPI, nfcmobile=$KEYPLE_NFCMOBILE"
 
       - name: Update Package.swift file
         run: |
