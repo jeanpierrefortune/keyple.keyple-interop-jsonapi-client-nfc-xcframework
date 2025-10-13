@@ -12,7 +12,7 @@ let package = Package(
    targets: [
       .binaryTarget(
          name: "KeypleInteropJsonapiClientNfc",
-         url: "https://github.com/jeanpierrefortune/keyple.keyple-interop-jsonapi-client-nfc-xcframework/releases/download/1.0.2/keyple-interop-jsonapi-client-nfc-xcframework.zip",
-         checksum: "3202abea1b5744abd2a7b74af803391a74504c63ed48a549cc3dc6f5d267a63d") // Generated on 2025-10-10 14:35:42
+         url: "https://github.com/jeanpierrefortune/keyple.keyple-interop-jsonapi-client-nfc-xcframework/releases/download/1.0.0/keyple-interop-jsonapi-client-nfc-xcframework.zip",
+         checksum: "69cc9b2bb26af87a331f36d309fbf90cca11879b4e79803673b0776fa50956bb") // Generated on 2025-10-13 15:58:26
    ]
 )
