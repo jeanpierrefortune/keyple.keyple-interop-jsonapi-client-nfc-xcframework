@@ -8,9 +8,6 @@ plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.spotless)
-  alias(libs.plugins.dokka)
-  signing
-  `maven-publish`
 }
 
 tasks {

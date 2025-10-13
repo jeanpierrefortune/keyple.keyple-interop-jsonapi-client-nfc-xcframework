@@ -18,7 +18,7 @@ jobs:
       - name: Determine next version
         id: calc
         run: |
-          VERSION=$(grep 'version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          VERSION=$(grep '^version[[:space:]]*=[[:space:]]*' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
           if [ -z "$VERSION" ]; then
             echo "Error: 'version' variable not found in gradle.properties"
             exit 1
