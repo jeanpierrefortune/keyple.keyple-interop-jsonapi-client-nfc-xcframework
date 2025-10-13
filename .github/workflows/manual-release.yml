@@ -29,17 +29,17 @@ jobs:
       - name: Extract library versions
         id: lib_versions
         run: |
-            KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
-            KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
-            
-            # Check if versions have been extracted successfully
-            if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
-          echo "Error: Unable to extract the version of one or more libraries." >&2
-            exit 1
-            fi
-            
-            echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
-            echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
+          KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
+          KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
+          
+          # Check if versions have been extracted successfully
+          if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
+            echo "Error: Unable to extract the version of one or more libraries." >&2
+          exit 1
+          fi
+          
+          echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
+          echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
           echo "Extracted versions: jsonapi=$KEYPLE_JSONAPI, nfcmobile=$KEYPLE_NFCMOBILE"
 
       - name: Setup JDK 17
