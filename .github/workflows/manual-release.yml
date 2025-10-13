@@ -2,11 +2,6 @@ name: Manual Release XCFramework
 
 on:
   workflow_dispatch:
-    inputs:
-      bump:
-        description: "Force a version bump (major, minor, patch). Leave empty for auto-detection."
-        required: false
-        default: ""
 
 jobs:
   release:
@@ -18,29 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed to access tags
+          fetch-depth: 0
 
       - name: Determine next version
         id: calc
         run: |
-          chmod +x .github/scripts/detect-lib-change-git.sh .github/scripts/bump-version.sh
-
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
-          PREV_VERSION="$PREV_TAG"
-
-          # If manual bump is requested
-          if [ -n "${{ github.event.inputs.bump }}" ]; then
-            echo "Manual bump requested: ${{ github.event.inputs.bump }}"
-            CHANGE_LEVEL="${{ github.event.inputs.bump }}"
-          else
-            # Auto-detect library changes
-            CHANGE_LEVEL=$(bash .github/scripts/detect-lib-change-git.sh "$PREV_TAG")
+          VERSION=$(grep 'version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          if [ -z "$VERSION" ]; then
+            echo "Error: 'version' variable not found in gradle.properties"
+            exit 1
           fi
-
-          # Compute new framework version
-          NEW_VERSION=$(bash .github/scripts/bump-version.sh "$PREV_VERSION" "$CHANGE_LEVEL")
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Calculated new version: $NEW_VERSION ($CHANGE_LEVEL)"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Using version from gradle.properties: $VERSION"
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
