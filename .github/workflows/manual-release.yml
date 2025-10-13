@@ -29,12 +29,12 @@ jobs:
       - name: Extract library versions
         id: lib_versions
         run: |
-          KEYPLE_JSONAPI=$(grep 'keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | sed -n 's/.*= *"\([^"]*\)".*/\1/p')
-          KEYPLE_NFCMOBILE=$(grep 'keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | sed -n 's/.*= *"\([^"]*\)".*/\1/p')
+          KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLib' gradle/libs.versions.toml | cut -d'"' -f2)
+          KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLib' gradle/libs.versions.toml | cut -d'"' -f2)
           
-          # Check if versions were extracted successfully
+          # Check if versions have been extracted successfully
           if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
-            echo "Error: Could not extract one or more library versions." >&2
+            echo "Error: Unable to extract the version of one or more libraries." >&2
             exit 1
           fi
           
