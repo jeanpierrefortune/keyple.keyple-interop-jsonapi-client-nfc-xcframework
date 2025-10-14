@@ -1,41 +1,30 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -euo pipefail
 
-# Vérifie qu'un argument a été fourni
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <tag>"
-    exit 1
+VERSION="$1"
+CHANGELOG_FILE="CHANGELOG.md"
+
+# Check if CHANGELOG.md exists
+if [ ! -f "$CHANGELOG_FILE" ]; then
+  echo "Error: $CHANGELOG_FILE not found"
+  exit 1
 fi
 
-TAG="$1"
-CHANGELOG="CHANGELOG.md"
+# Find the line number where the section for the given version starts
+START_LINE=$(grep -n "^## \[$VERSION\]" "$CHANGELOG_FILE" | cut -d: -f1)
 
-# Vérifie que le fichier CHANGELOG.md existe
-if [ ! -f "$CHANGELOG" ]; then
-    echo "Erreur : $CHANGELOG introuvable."
-    exit 1
+if [ -z "$START_LINE" ]; then
+  echo "Error: Version $VERSION not found in $CHANGELOG_FILE"
+  exit 1
 fi
 
-# Extraction de la section correspondant au tag
-# La section commence par "## [TAG]" et s'arrête à la prochaine ligne commençant par "## [" ou à la fin du fichier
-SECTION=$(awk -v tag="$TAG" '
-    BEGIN { found=0 }
-    /^## \[.*\]/ {
-        if ($0 ~ "## \\[" tag "\\]") {
-            found=1
-            print
-            next
-        } else if (found==1) {
-            exit
-        }
-    }
-    found==1 { print }
-' "$CHANGELOG")
+# Find the line number where the next version section starts
+# If there is no next version, use the end of the file
+TOTAL_LINES=$(wc -l < "$CHANGELOG_FILE")
+NEXT_LINE=$(tail -n +$((START_LINE+1)) "$CHANGELOG_FILE" | grep -n -m1 "^## \[" | cut -d: -f1 || echo "$((TOTAL_LINES-START_LINE))")
+END_LINE=$((START_LINE + NEXT_LINE - 1))
 
-# Vérifie si le tag a été trouvé
-if [ -z "$SECTION" ]; then
-    echo "Erreur : le tag '$TAG' n'a pas été trouvé dans $CHANGELOG."
-    exit 1
-fi
-
-# Affiche la section
-echo "$SECTION"
+# Extract lines between START_LINE and END_LINE
+# Exclude the first line (section title) and any lines starting with '[' (references)
+sed -n "$((START_LINE+1)),$END_LINE p" "$CHANGELOG_FILE" \
+  | grep -v '^\['

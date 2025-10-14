@@ -36,10 +36,10 @@ jobs:
           KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
           KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
           
-          # Check if versions have been extracted successfully
+          echo "Check if versions have been extracted successfully"
           if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
             echo "Error: Unable to extract the version of one or more libraries." >&2
-          exit 1
+            exit 1
           fi
           
           echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
@@ -57,7 +57,7 @@ jobs:
 
       - name: Validate XCFramework
         run: |
-          # Find the generated XCFramework
+          echo "Find the generated XCFramework"
           XCFRAMEWORK_PATH=$(find build/XCFrameworks/release -name "*.xcframework" -type d | head -1)
           if [ -z "$XCFRAMEWORK_PATH" ]; then
             echo "Error: No XCFramework found in build/XCFrameworks/release"
@@ -65,13 +65,13 @@ jobs:
           fi
           echo "Found XCFramework: $XCFRAMEWORK_PATH"
           
-          # Verify XCFramework structure
+          echo "Verify XCFramework structure"
           if [ ! -f "$XCFRAMEWORK_PATH/Info.plist" ]; then
             echo "Error: Info.plist not found in XCFramework"
             exit 1
           fi
           
-          # List contents for verification
+          echo "List contents for verification"
           echo "XCFramework contents:"
           ls -R "$XCFRAMEWORK_PATH"
           echo "XCFramework validation completed successfully"
@@ -95,13 +95,13 @@ jobs:
           TIMESTAMP=" // Generated on $(date '+%Y-%m-%d %H:%M:%S')"
           PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ steps.metadata.outputs.project-version }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
           
-          # Replace the URL value
+          echo "Replace the URL value"
           sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
           
-          # Replace the checksum value
+          echo "Replace the checksum value"
           sed -i '' "s|checksum: *\"[^\"]*\").*$|checksum: \"${{ env.checksum }}\")$TIMESTAMP|" Package.swift
           
-          echo "Package.swift has been updated with the permalink, checksum and timestamp."
+          echo "Package.swift updated."
           cat Package.swift
 
       - name: Commit and tag changes
@@ -114,15 +114,20 @@ jobs:
           git push
           git push --tags
 
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          chmod +x ./scripts/extract_changelog.sh
+          CHANGELOG_TEXT=$(./scripts/extract_changelog.sh "${{ steps.metadata.outputs.project-version }}")
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.metadata.outputs.project-version }}
           name: Release ${{ steps.metadata.outputs.project-version }}
           body: |
-            Automated release based on library versions.
-
-            **Embedded libs**
-            - keypleInteropJsonapiClientKmpLibVersion: ${{ steps.lib_versions.outputs.jsonapi }}
-            - keypleInteropLocalreaderNfcmobileKmpLibVersion: ${{ steps.lib_versions.outputs.nfcmobile }}
+            ${{ steps.changelog.outputs.changelog }}
           files: keyple-interop-jsonapi-client-nfc-xcframework.zip
