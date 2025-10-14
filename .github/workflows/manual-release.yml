@@ -30,21 +30,14 @@ jobs:
             exit 1
           fi
 
-      - name: Extract library versions
-        id: lib_versions
+      - name: Extract changelog section
+        id: changelog
         run: |
-          KEYPLE_JSONAPI=$(grep '^keypleInteropJsonapiClientKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
-          KEYPLE_NFCMOBILE=$(grep '^keypleInteropLocalreaderNfcmobileKmpLibVersion' gradle/libs.versions.toml | cut -d'"' -f2)
-          
-          echo "Check if versions have been extracted successfully"
-          if [ -z "$KEYPLE_JSONAPI" ] || [ -z "$KEYPLE_NFCMOBILE" ]; then
-            echo "Error: Unable to extract the version of one or more libraries." >&2
-            exit 1
-          fi
-          
-          echo "jsonapi=$KEYPLE_JSONAPI" >> $GITHUB_OUTPUT
-          echo "nfcmobile=$KEYPLE_NFCMOBILE" >> $GITHUB_OUTPUT
-          echo "Extracted versions: jsonapi=$KEYPLE_JSONAPI, nfcmobile=$KEYPLE_NFCMOBILE"
+          chmod +x ./scripts/extract_changelog.sh
+          CHANGELOG_TEXT=$(${{ github.action_path }}/scripts/extract_changelog.sh "${{ steps.metadata.outputs.project-version }}")
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -113,15 +106,6 @@ jobs:
           git tag ${{ steps.metadata.outputs.project-version }}
           git push
           git push --tags
-
-      - name: Extract changelog section
-        id: changelog
-        run: |
-          chmod +x ./scripts/extract_changelog.sh
-          CHANGELOG_TEXT=$(./scripts/extract_changelog.sh "${{ steps.metadata.outputs.project-version }}")
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
