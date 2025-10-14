@@ -39,6 +39,11 @@ jobs:
           # Run the script and capture the changelog text
           CHANGELOG_TEXT=$(./.github/scripts/extract_changelog.sh "${{ steps.metadata.outputs.project-version }}")
           
+          # Display the changelog content for debugging
+          echo "----- Extracted changelog for version ${{ steps.metadata.outputs.project-version }} -----"
+          echo "$CHANGELOG_TEXT"
+          echo "-------------------------------------------------------------"
+          
           # Safely export multiline text to GITHUB_OUTPUT
           {
             echo "changelog<<EOF"
