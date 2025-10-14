@@ -33,10 +33,10 @@ jobs:
       - name: Extract changelog section
         id: changelog
         run: |
-          chmod +x ${{ github.action_path }}/scripts/extract_changelog.sh
-          CHANGELOG_TEXT=$(${{ github.action_path }}/scripts/extract_changelog.sh "${{ steps.metadata.outputs.project-version }}")
+          chmod +x ../../scripts/extract_changelog.sh
+          CHANGELOG_TEXT=$(../../scripts/extract_changelog.sh "${{ steps.metadata.outputs.project-version }}")
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
+          printf "%s\n" "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup JDK 17
