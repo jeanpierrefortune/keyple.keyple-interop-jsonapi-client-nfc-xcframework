@@ -1,4 +1,4 @@
-# Notices for 'Eclipse Keyple' Java implementation
+# Notices for 'Eclipse Keyple' implementation
 
 This content is produced and maintained by the Eclipse Keyple project.
 
