@@ -1,4 +1,4 @@
-rootProject.name = "KeypleInteropJsonapiClientNfc"
+rootProject.name = "KeypleInterop"
 
 pluginManagement {
   repositories {

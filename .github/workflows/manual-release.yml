@@ -18,6 +18,8 @@ jobs:
       - name: Extract project name and version
         id: metadata
         run: |
+          PROJECT_NAME=$(grep "^rootProject\.name" settings.gradle.kts | cut -d'=' -f2 | tr -d ' ')
+          echo "project-name=$PROJECT_NAME" >> $GITHUB_OUTPUT
           PROJECT_VERSION=$(grep "^version" gradle.properties | cut -d'=' -f2 | tr -d ' ')
           echo "project-version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
 
@@ -87,19 +89,19 @@ jobs:
           cd build/XCFrameworks/release
           XCFRAMEWORK=$(ls -d *.xcframework | head -1)
           echo "Found XCFramework: $XCFRAMEWORK"
-          zip -r ../../../keyple-interop-jsonapi-client-nfc-xcframework.zip "$XCFRAMEWORK"
+          zip -r ../../../${{ steps.metadata.outputs.project-name }}-${{ steps.metadata.outputs.project-version }}-xcframework.zip "$XCFRAMEWORK"
 
       - name: Compute checksum
         id: compute_checksum
         run: |
-          CHECKSUM=$(swift package compute-checksum keyple-interop-jsonapi-client-nfc-xcframework.zip)
+          CHECKSUM=$(swift package compute-checksum ${{ steps.metadata.outputs.project-name }}-${{ steps.metadata.outputs.project-version }}-xcframework.zip)
           echo "checksum=$CHECKSUM" >> $GITHUB_ENV
           echo "Computed checksum: $CHECKSUM"
 
       - name: Update Package.swift file
         run: |
           TIMESTAMP=" // Generated on $(date '+%Y-%m-%d %H:%M:%S')"
-          PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ steps.metadata.outputs.project-version }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
+          PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ steps.metadata.outputs.project-version }}/${{ steps.metadata.outputs.project-name }}-${{ steps.metadata.outputs.project-version }}-xcframework.zip"
           
           echo "Replace the URL value"
           sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
@@ -127,4 +129,4 @@ jobs:
           name: Release ${{ steps.metadata.outputs.project-version }}
           body: |
             ${{ steps.changelog.outputs.changelog }}
-          files: keyple-interop-jsonapi-client-nfc-xcframework.zip
+          files: ${{ steps.metadata.outputs.project-name }}-${{ steps.metadata.outputs.project-version }}-xcframework.zip
