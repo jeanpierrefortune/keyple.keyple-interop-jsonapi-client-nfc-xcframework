@@ -13,6 +13,6 @@ let package = Package(
       .binaryTarget(
          name: "KeypleInterop",
          url: "https://github.com/jeanpierrefortune/keyple.keyple-interop-jsonapi-client-nfc-xcframework/releases/download/1.0.0/KeypleInterop-1.0.0-xcframework.zip",
-         checksum: "4059d37bf04ff24bdfcd43c72be1a217bdfb466419e9b62ffe36f0113ed1928a") // Generated on 2025-10-14 12:34:03
+         checksum: "95c70f50f9d3fd8ce249e0cccf7e27170f6a1bb41c5fb385c83b7a546aeb42fb") // Generated on 2025-10-14 13:20:55
    ]
 )
