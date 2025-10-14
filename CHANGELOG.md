@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2025-10-14
 ### Added
-- Initial release
+- Added initial dependencies:
+    - `keyple-interop-jsonapi-client-kmp-lib: 0.1.6`
+    - `keyple-interop-localreader-nfcmobile-kmp-lib: 0.1.6`
 
 [Unreleased]: https://github.com/eclipse-keyple/keyple-interop-jsonapi-client-nfc-xcframework/compare/1.0.0...HEAD
 [1.0.0]: https://github.com/eclipse-keyple/keyple-interop-jsonapi-client-nfc-xcframework/releases/tag/1.0.0
