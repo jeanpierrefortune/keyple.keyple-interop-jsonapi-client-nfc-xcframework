@@ -15,16 +15,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine next version
-        id: calc
+      - name: Extract project name and version
+        id: metadata
         run: |
-          VERSION=$(grep '^version[[:space:]]*=[[:space:]]*' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
-          if [ -z "$VERSION" ]; then
-            echo "Error: 'version' variable not found in gradle.properties"
+          PROJECT_VERSION=$(grep "^version" gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          echo "project-version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if this version is already released
+        run: |
+          PROJECT_VERSION=${{ steps.metadata.outputs.project-version }}
+          
+          if git tag -l | grep -q "^${PROJECT_VERSION}$"; then
+            echo "Error: Tag 'PROJECT_VERSION' already exists. Please update the version in gradle.properties."
             exit 1
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Using version from gradle.properties: $VERSION"
 
       - name: Extract library versions
         id: lib_versions
@@ -89,7 +93,7 @@ jobs:
       - name: Update Package.swift file
         run: |
           TIMESTAMP=" // Generated on $(date '+%Y-%m-%d %H:%M:%S')"
-          PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ steps.calc.outputs.version }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
+          PERMALINK="https://github.com/${{ github.repository }}/releases/download/${{ steps.metadata.outputs.project-version }}/keyple-interop-jsonapi-client-nfc-xcframework.zip"
           
           # Replace the URL value
           sed -i '' "s|url: \".*\"|url: \"$PERMALINK\"|" Package.swift
@@ -105,16 +109,16 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add Package.swift
-          git commit -m "Update Package.swift for release ${{ steps.calc.outputs.version }}"
-          git tag ${{ steps.calc.outputs.version }}
+          git commit -m "Update Package.swift for release ${{ steps.metadata.outputs.project-version }}"
+          git tag ${{ steps.metadata.outputs.project-version }}
           git push
           git push --tags
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.calc.outputs.version }}
-          name: Release ${{ steps.calc.outputs.version }}
+          tag_name: ${{ steps.metadata.outputs.project-version }}
+          name: Release ${{ steps.metadata.outputs.project-version }}
           body: |
             Automated release based on library versions.
 
